@@ -35,6 +35,7 @@ python -c "import torch;print(torch.cuda.is_available())"
 ```python
 import torch
 import torchvision
+import numpy as np
 
 model = torchvision.models.alexnet(pretrained=True).cuda()
 model.eval()
@@ -69,6 +70,7 @@ print(predictions.cpu().numpy() - onnx_outputs)
 
 ```python
 import os
+import numpy as np
 import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
