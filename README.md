@@ -450,7 +450,7 @@ if (ctx->getOpsetVersion() > 10)
 >   %947 : Tensor = onnx::NonZero(%946), scope: \_\_module.rpn/\_\_module.rpn.box_selector_test
 >   %948 : Tensor = onnx::Transpose\[perm=[1, 0]](%947), scope: \_\_module.rpn/\_\_module.rpn.box_selector_test
 >   %949 : Tensor = onnx::Squeeze\[axes=[1]](%948), scope: \_\_module.rpn/\_\_module.rpn.box_selector_test
->   %950 : Long(1) = onnx::Cast\[to=7](%949), scope: \_\_module.rpn/\_\_module.rpn.box_selector_test # /export/zhangyifeng/codes/maskrcnn-benchmark/maskrcnn_benchmark/modeling/rpn/inference.py:98:0
+>   %950 : Long(1) = onnx::Cast\[to=7](%949), scope: \_\_module.rpn/\_\_module.rpn.box_selector_test # /maskrcnn-benchmark/maskrcnn_benchmark/modeling/rpn/inference.py:98:0
 
 表明是在*maskrcnn_benchmark/modeling/rpn/inference.py*文件中第98行使用的，找到这一行发现是个`torch.arange`操作。解决办法修改*symbolic_opset10.py*文件，加入arange算子
 
@@ -475,7 +475,7 @@ def arange(g, *args):
 
 重新执行`python tools/export_onnx.py && python tools/convert_model.py`后，出现报错如下
 
-> [TensorRT] VERBOSE: /root/zhangyifeng/env/TensorRT/parsers/onnx/ModelImporter.cpp:129:  [Slice] inputs: [986 -> (1)], [990 -> (1)], [991 -> (1)], [992 -> (1)],
+> [TensorRT] VERBOSE: /TensorRT/parsers/onnx/ModelImporter.cpp:129:  [Slice] inputs: [986 -> (1)], [990 -> (1)], [991 -> (1)], [992 -> (1)],
 > ERROR: Failed to parse the ONNX file.
 > In node 715 (importSlice): UNSUPPORTED_NODE: Assertion failed: axes.valuesKnown()
 
@@ -658,7 +658,7 @@ DEFINE_BUILTIN_OP_IMPORTER(NonMaxSuppression)
 
 编辑*plugin/CMakeLists.txt*文件，在`PLUGIN_LISTS`加入我们新建的文件夹名称，nonMaxSuppressionPlugin。
 
-参考官方文档见[这里](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#add_custom_layer)，新增的代码见[这里](http://coding.jd.com/zhangyifeng6/TensorRT/)。主要修改点如下：
+参考官方文档见[这里](https://docs.nvidia.com/deeplearning/tensorrt/developer-guide/index.html#add_custom_layer)，新增的代码见这里。主要修改点如下：
 
 - 遵循文档内容，使用`IPluginV2DynamicExt`代替了原来使用的`IPluginV2Ext`父类，修改各个成员函数返回值，如输入输出标量的个数、维度以及类型。
 - 返回值改为索引值，长度为固定的`keepTopK`个，不够长时使用-1补齐
